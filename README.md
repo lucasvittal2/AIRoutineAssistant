@@ -14,7 +14,7 @@ Therefore this app will have the following features:
 
 Actuacly we are starting this ambitious app, and we're gonna develope the first MVP:
 
-![MVP1 Schema](Images/mvp1-schema.png)
+![MVP1 Schema](Images/general-schema.png)
 
 The actual architecture schema can be seen below:
 ![MVP1 Architecture](Images/mvp1-schema.png)
