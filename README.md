@@ -14,9 +14,6 @@ Therefore this app will have the following features:
 
 Actualy we are starting this ambitious app, and we're gonna develope the first MVP:
 
-![MVP1 Schema](Images/general-schema.png)
-
-The actual architecture schema can be seen below:
 ![MVP1 Architecture](Images/mvp1-schema.png)
 
 Our pupose is to enhance the app through iteraction and evoluting it along the sprints in order to take the most assertive decision until reach the final version.
