@@ -12,7 +12,7 @@ Therefore this app will have the following features:
 - Generate Vizualization from user routine metrics
 - Using a GenAI able to interact throug many source and give the routine information aspect of user from a simple text query
 
-Actuacly we are starting this ambitious app, and we're gonna develope the first MVP:
+Actualy we are starting this ambitious app, and we're gonna develope the first MVP:
 
 ![MVP1 Schema](Images/mvp1-schema.png)
 
