@@ -17,9 +17,6 @@ class TodoIstExtractor(ETLJobInterface):
     def __update_extractrion_record_track(self, file_path: str, timestamp: TimeRecord) -> None:
         with open(file_path, 'a') as file:
             file.write(timestamp.strftime("%Y-%m-%d %H:%M:%S") + '\n')
-            
-    def __record_extraction_timestamp(self) -> None:
-        pass
 
     def extract_data(self) -> Json:
         pass
