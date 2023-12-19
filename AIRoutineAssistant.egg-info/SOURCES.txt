@@ -1,0 +1,7 @@
+README.md
+pyproject.toml
+AIRoutineAssistant.egg-info/PKG-INFO
+AIRoutineAssistant.egg-info/SOURCES.txt
+AIRoutineAssistant.egg-info/dependency_links.txt
+AIRoutineAssistant.egg-info/requires.txt
+AIRoutineAssistant.egg-info/top_level.txt

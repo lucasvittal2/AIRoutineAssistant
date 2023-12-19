@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Name: AIRoutineAssistant
+Version: 1.0
+Summary: App Developed to be and AI Agent Assistant 
+Author: Lucas Vital
+Maintainer: Lucas Alves
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+Requires-Dist: scipy
+Requires-Dist: todoist-api-python

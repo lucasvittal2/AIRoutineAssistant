@@ -1,0 +1,34 @@
+
+
+
+
+[build-system]
+requires = ["setuptools >= 67.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "AIRoutineAssistant"
+version='1.0'
+dependencies = [
+  "pandas",
+  "matplotlib",
+  "seaborn",
+  "scipy",
+  "todoist-api-python"
+]
+
+authors = [
+  {name = "Lucas Vital"}
+]
+maintainers = [
+  {name = "Lucas Alves"}
+]
+description="App Developed to be and AI Agent Assistant "
+
+
+[tool.setuptools]
+packages = ['Env', 'GettingDataETL']
+
+[tool.poetry.dependencies]
+todoist-api-python = "^v2.0.0"
