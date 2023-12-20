@@ -1,0 +1,7 @@
+#app configs
+API_KEYS:
+  TODOIST_API_KEY: "003996cd9a3c509419a9642cefdfe195a6e8d86e"
+  GOOGLE_API_KEY: "your google api key"
+  OUTLOOK_API_KEY: "your outlook api key"
+
+log: True
