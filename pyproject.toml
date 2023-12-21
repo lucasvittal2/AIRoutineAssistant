@@ -28,7 +28,7 @@ description="App Developed to be and AI Agent Assistant "
 
 
 [tool.setuptools]
-packages = ['Env', 'GettingDataETL']
+packages = ['Env', 'GettingDataETL', 'Interfaces', 'Utils']
 
 [tool.poetry.dependencies]
 todoist-api-python = "^v2.0.0"

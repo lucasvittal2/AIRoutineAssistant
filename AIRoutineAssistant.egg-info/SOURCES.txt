@@ -5,3 +5,10 @@ AIRoutineAssistant.egg-info/SOURCES.txt
 AIRoutineAssistant.egg-info/dependency_links.txt
 AIRoutineAssistant.egg-info/requires.txt
 AIRoutineAssistant.egg-info/top_level.txt
+Env/__init__.py
+Env/paths.py
+Env/project_types.py
+Interfaces/ETLJobInterface.py
+Interfaces/__init__.py
+Utils/__init__.py
+Utils/file_handler.py
