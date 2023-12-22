@@ -1,3 +1,4 @@
+import os
 import subprocess
 import json
 from todoist_api_python.api import TodoistAPI
@@ -6,7 +7,7 @@ from Interfaces.ETLJobInterface import ETLJobInterface
 from Env.project_types import *
 from Env.paths import *
 from Utils.file_handler import read_yaml
-from pandas import DataFrame
+from pandas import DataFrame, read_csv, concat
 import datetime
 
 class TodoIstExtractor(ETLJobInterface):
@@ -28,7 +29,7 @@ class TodoIstExtractor(ETLJobInterface):
             timestamp = datetime.datetime.strptime(last_record.strip(), time_format)
         return timestamp
     
-    def __update_extractrion_record_track(self, file_path: str, timestamp: TimeRecord) -> None:
+    def __update_extraction_record_track(self, file_path: str, timestamp: TimeRecord) -> None:
         with open(file_path, 'a') as file:
             file.write(timestamp.strftime("%Y-%m-%d %H:%M:%S") + '\n')
     
@@ -111,6 +112,12 @@ class TodoIstExtractor(ETLJobInterface):
             
         return df 
     
+    def __track_extraction_datetime(self, data: Json) -> Json:
+        for key in data.keys():
+            data[key]['extraction_datetime'] = datetime.datetime.now()
+        
+        return data
+    
     def extract_data(self) -> Json:
         
         print("Extracting open tasks data...")
@@ -148,19 +155,36 @@ class TodoIstExtractor(ETLJobInterface):
         comments_df = self.__parse_to_df(commets) 
         print("Comments data extracted !!")
         
+        #track
+        track_time  = datetime.datetime.now()
+        self.__update_extraction_record_track(DATA_TRACK_PATH + 'extraction_records.txt', track_time)
         
-        return {
+        
+        #aplicar aqui um filtro dos dados existentes
+        extracted_data = self.__track_extraction_datetime({
             "opened_tasks": open_tasks_df,
             "completed_tasks": completed_tasks_df,
             "projects": projects_df,
             "comments": comments_df,
             'productivity_stats': prod_stats_df
-        }
+        })
+        
+        return extracted_data
            
     #This method is not implemented yet, it actually mocked!!!!!
     # Future work: implement this method to load data on postgresql database
     def load_on_database(self, data: DataFrame, file_name: str) -> None:
         
-        data.to_csv(DATABASE_PATH + file_name, index=False)
+        if os.path.exists(DATABASE_PATH + file_name):
+            tmp_df = read_csv(DATABASE_PATH + file_name)
+            last_extraction = self.__get_last_data_update_record_track()
+            data =  data[data['extraction_datetime'] > last_extraction]
+            data = concat(tmp_df, data)
+            data.to_csv(DATABASE_PATH + file_name, index=False)
+        else:
+        
+            data.to_csv(DATABASE_PATH + file_name, index=False)
+        
+        
         print(f'Saved data on {file_name}!')
 
