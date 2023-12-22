@@ -82,7 +82,21 @@ class TodoIstExtractor(ETLJobInterface):
         except Exception as error:
             print(error)
             return None
-    def parse_to_df(self, data: Dict) -> Table:
+        
+    def __get_productivity_stats(self) -> TodoistKarmaProductivity:
+            
+            try:
+                shell_command = f"""
+                    curl https://api.todoist.com/sync/v9/completed/get_stats \
+                    -H "Authorization: Bearer {self.todoist_api._token}"
+                """
+                response = subprocess.run(shell_command, shell=True, capture_output=True)
+                karma_stats = json.loads(response.stdout)['days_items']
+                return karma_stats
+            except Exception as error:
+                print(error)
+                return None
+    def __parse_to_df(self, data: Dict) -> Table:
         
         
         if type(data) == list:
@@ -99,32 +113,48 @@ class TodoIstExtractor(ETLJobInterface):
     
     def extract_data(self) -> Json:
         
+        print("Extracting open tasks data...")
         open_tasks = self.__get_open_tasks()
+        print("open tasks data extracted !!")
         
+        print("Extracting projects data...")
         projects = self.__get_projects()
+        print("projects data extracted !!")
         
         
-        open_tasks_df = self.parse_to_df(open_tasks)
-        projects_df = self.parse_to_df(projects)
+        open_tasks_df = self.__parse_to_df(open_tasks)
+        projects_df = self.__parse_to_df(projects)
         
         
         
         # to get completed task  it is necessary to get the project id
+        print('Extracting completed tasks data...')
         completed_tasks = self.__get_completed_tasks(projects_df['id'].tolist())
-        completed_tasks_df = self.parse_to_df(completed_tasks)
+        completed_tasks_df = self.__parse_to_df(completed_tasks)
+        print('completed tasks data extracted !!')
+        
+        
+        print('Extracting productivity stats data...')
+        prod_stats= self.__get_productivity_stats()
+        prod_stats_df = self.__parse_to_df(prod_stats)
+        print('productivity stats data extracted !!')
         task_ids = completed_tasks_df['task_id'].tolist()
         task_ids.extend(open_tasks_df['id'].tolist())
         
         
         # to get comments its is needed task ids
+        print('Extracting comments data...')
         commets= self.__get_comments(task_ids)
-        comments_df = self.parse_to_df(commets) 
+        comments_df = self.__parse_to_df(commets) 
+        print("Comments data extracted !!")
+        
         
         return {
             "opened_tasks": open_tasks_df,
             "completed_tasks": completed_tasks_df,
             "projects": projects_df,
-            "comments": comments_df
+            "comments": comments_df,
+            'productivity_stats': prod_stats_df
         }
            
     #This method is not implemented yet, it actually mocked!!!!!
@@ -132,4 +162,5 @@ class TodoIstExtractor(ETLJobInterface):
     def load_on_database(self, data: DataFrame, file_name: str) -> None:
         
         data.to_csv(DATABASE_PATH + file_name, index=False)
+        print(f'Saved data on {file_name}!')
 
