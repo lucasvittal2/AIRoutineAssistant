@@ -1,4 +1,5 @@
-import requests
+import subprocess
+import json
 from todoist_api_python.api import TodoistAPI
 from Env.project_types import Dict, Table
 from Interfaces.ETLJobInterface import ETLJobInterface
@@ -32,28 +33,29 @@ class TodoIstExtractor(ETLJobInterface):
             file.write(timestamp.strftime("%Y-%m-%d %H:%M:%S") + '\n')
     
     def __get_open_tasks(self) -> TodoistOpenedTasks:
-
         try:
-            url = "https://api.todoist.com/sync/v9/sync"
-            headers = {
-                "Authorization": f"Bearer {self.todoist_api.token}",
-            }
-            data = {
-                "sync_token": "*",
-                "resource_types": '["projects"]',
-            }
-
-            response = requests.post(url, headers=headers, data=data)
-            return response.json()
+            open_tasks = self.todoist_api.get_tasks()
+            return open_tasks
+           
+        # Check for authentication error
         except Exception as error:
             print(error)
             return None
-        
-    def __get_completed_tasks(self) -> TodoistCompletedTasks:
-
+            
+    def __get_completed_tasks(self, project_ids: List[str]) -> TodoistCompletedTasks:
+        completed_tasks = []
         try:
-            closed_tasks = self.todoist_api.get_completed_items()
-            return dict([task.__dict__ for task in closed_tasks])
+            for project_id in project_ids:
+                shell_command = f"""
+                curl https://api.todoist.com/sync/v9/completed/get_all\
+                -d "project_id={project_id}"\
+                -H "Authorization: Bearer {self.todoist_api._token}"
+                """
+                response = subprocess.run(shell_command, shell=True, capture_output=True)
+                completed_tasks += json.loads(response.stdout)['items']
+          
+            return completed_tasks
+        
         except Exception as error:
             
             print(error)
@@ -63,43 +65,66 @@ class TodoIstExtractor(ETLJobInterface):
         
         try:
             projects = self.todoist_api.get_projects()
-            return dict([proj.to_dict() for proj in projects])
+            return projects
         except Exception as error:
             print(error)
             return None
         
-    def __get_comments(self) -> TodoistComments:
+    def __get_comments(self, task_ids: List[str]) -> TodoistComments:
 
         try:
-            comments = self.todoist_api.get_comments()
-            return [ comment.to_dict for comment in comments]
+            comments = [ comment
+                        for task_id in task_ids
+                        for comment in self.todoist_api.get_comments(task_id=task_id) 
+                        if self.todoist_api.get_comments(task_id=task_id) 
+                    ]
+            return comments
         except Exception as error:
             print(error)
             return None
     def parse_to_df(self, data: Dict) -> Table:
         
-        fields = data.keys()
         
-        df = DataFrame(data, columns=fields)
-        return df
+        if type(data) == list:
+            if type(data[0]) != dict:
+                
+                fields = data[0].__dict__.keys()
+            else:
+                fields = data[0].keys()
+            
+            df = DataFrame(data, columns=fields)
+
+            
+        return df 
     
     def extract_data(self) -> Json:
         
         open_tasks = self.__get_open_tasks()
-        closed_tasks = self.__get_completed_tasks()
-        #projects = self.__get_projects()
-        #commets= self.__get_comments()
+        
+        projects = self.__get_projects()
+        
         
         open_tasks_df = self.parse_to_df(open_tasks)
-        # closed_tasks_df = self.parse_to_df(closed_tasks)
-        # projects_df = self.parse_to_df(projects)
-        # comments_df = self.parse_to_df(commets) 
+        projects_df = self.parse_to_df(projects)
+        
+        
+        
+        # to get completed task  it is necessary to get the project id
+        completed_tasks = self.__get_completed_tasks(projects_df['id'].tolist())
+        completed_tasks_df = self.parse_to_df(completed_tasks)
+        task_ids = completed_tasks_df['task_id'].tolist()
+        task_ids.extend(open_tasks_df['id'].tolist())
+        
+        
+        # to get comments its is needed task ids
+        commets= self.__get_comments(task_ids)
+        comments_df = self.parse_to_df(commets) 
         
         return {
             "opened_tasks": open_tasks_df,
-            "closed_tasks": closed_tasks,
-            # "projects": projects_df,
-            # "comments": comments_df
+            "completed_tasks": completed_tasks_df,
+            "projects": projects_df,
+            "comments": comments_df
         }
            
     #This method is not implemented yet, it actually mocked!!!!!
