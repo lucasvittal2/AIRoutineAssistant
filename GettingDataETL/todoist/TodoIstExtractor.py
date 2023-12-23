@@ -215,12 +215,13 @@ class TodoIstExtractor(ETLJobInterface):
         if os.path.exists(DATABASE_PATH + file_name):
             old_data = read_csv(DATABASE_PATH + file_name)
             updated_data = self.__update_data(old_data, data, file_name)
-            updated_data.to_csv(DATABASE_PATH + file_name, index=False)
+            updated_data.to_pickle(DATABASE_PATH + file_name)
             
         else:
             updated_data = self.__track_extraction_datetime(data)
-            data.to_csv(DATABASE_PATH + file_name, index=False)
+            data.to_pickle(DATABASE_PATH + file_name)
         
         
         print(f'Saved data on {file_name}!')
 
+        
