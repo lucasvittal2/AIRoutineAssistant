@@ -7,7 +7,7 @@ from Interfaces.ETLJobInterface import ETLJobInterface
 from Env.project_types import *
 from Env.paths import *
 from Utils.file_handler import read_yaml
-from pandas import DataFrame, read_csv, concat
+from pandas import DataFrame, read_csv, concat, to_datetime
 import datetime
 
 class TodoIstExtractor(ETLJobInterface):
@@ -23,15 +23,16 @@ class TodoIstExtractor(ETLJobInterface):
         
     def __get_last_data_update_record_track(self, file_path: str, time_format: str = "%Y-%m-%d %H:%M:%S") -> TimeRecord:
         with open(file_path, 'r') as file:
-            if len(file.readlines()) == 0:
+            lines = file.readlines()
+            if len(lines) == 0:
                 return None
-            last_record = file.readlines()[-1]
+            last_record = lines[-1]
             timestamp = datetime.datetime.strptime(last_record.strip(), time_format)
         return timestamp
     
     def __update_extraction_record_track(self, file_path: str, timestamp: TimeRecord) -> None:
         with open(file_path, 'a') as file:
-            file.write(timestamp.strftime("%Y-%m-%d %H:%M:%S") + '\n')
+            file.write('\n' + timestamp.strftime("%Y-%m-%d %H:%M:%S") )
     
     def __get_open_tasks(self) -> TodoistOpenedTasks:
         try:
@@ -113,10 +114,14 @@ class TodoIstExtractor(ETLJobInterface):
         return df 
     
     def __track_extraction_datetime(self, data: Json) -> Json:
-        for key in data.keys():
-            data[key]['extraction_datetime'] = datetime.datetime.now()
+        track_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data['extraction_datetime'] = to_datetime(track_time)
         
         return data
+    
+    
+        
+    
     
     def extract_data(self) -> Json:
         
@@ -173,16 +178,47 @@ class TodoIstExtractor(ETLJobInterface):
            
     #This method is not implemented yet, it actually mocked!!!!!
     # Future work: implement this method to load data on postgresql database
+    def __update_data(self, old_data: DataFrame,new_data: DataFrame, file_name: str) -> DataFrame:
+        
+
+        tmp_old_data = old_data.copy()
+        tmp_new_data = new_data.copy()
+        if file_name == 'opened_tasks.csv':
+            tmp_old_data['created_at'] = to_datetime(tmp_old_data['created_at'])
+            tmp_new_data['created_at'] = to_datetime(tmp_new_data['created_at'])
+            last_update = tmp_old_data['created_at'].max()
+            filtered_data = tmp_new_data[ tmp_new_data['created_at'] > last_update]
+        elif file_name == 'completed_tasks.csv':
+            tmp_old_data['completed_at'] = to_datetime(tmp_old_data['completed_at'])
+            tmp_new_data['completed_at'] = to_datetime(tmp_new_data['completed_at'])
+            last_update = tmp_old_data['completed_at'].max()
+            filtered_data = tmp_new_data[ tmp_new_data['completed_at'] > last_update]
+        elif file_name == 'projects.csv':
+            existent_ids = tmp_old_data['id'].tolist()
+            filtered_data = tmp_new_data[~tmp_new_data['id'].isin(existent_ids)]
+        elif file_name == 'comments.csv':
+            tmp_old_data['posted_at'] = to_datetime(tmp_old_data['posted_at'])
+            tmp_new_data['posted_at'] = to_datetime(tmp_new_data['posted_at'])
+            last_update = tmp_old_data['posted_at'].max()
+            filtered_data = tmp_new_data[ tmp_new_data['posted_at'] > last_update]
+        elif file_name == 'productivity_stats.csv':
+            tmp_old_data['date'] = to_datetime(tmp_old_data['date'])
+            tmp_new_data['date'] = to_datetime(tmp_new_data['date'])
+            last_update = tmp_old_data['date'].max()
+            filtered_data = tmp_new_data[ tmp_new_data['date'] > last_update]
+            
+        filtered_data = self.__track_extraction_datetime(filtered_data)
+        updated_data= concat([tmp_old_data, filtered_data], axis=0)
+        return updated_data
     def load_on_database(self, data: DataFrame, file_name: str) -> None:
         
         if os.path.exists(DATABASE_PATH + file_name):
-            tmp_df = read_csv(DATABASE_PATH + file_name)
-            last_extraction = self.__get_last_data_update_record_track()
-            data =  data[data['extraction_datetime'] > last_extraction]
-            data = concat(tmp_df, data)
-            data.to_csv(DATABASE_PATH + file_name, index=False)
+            old_data = read_csv(DATABASE_PATH + file_name)
+            updated_data = self.__update_data(old_data, data, file_name)
+            updated_data.to_csv(DATABASE_PATH + file_name, index=False)
+            
         else:
-        
+            updated_data = self.__track_extraction_datetime(data)
             data.to_csv(DATABASE_PATH + file_name, index=False)
         
         
