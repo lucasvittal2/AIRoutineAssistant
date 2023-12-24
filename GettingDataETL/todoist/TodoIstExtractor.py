@@ -7,8 +7,9 @@ from Interfaces.ETLJobInterface import ETLJobInterface
 from Env.project_types import *
 from Env.paths import *
 from Utils.file_handler import read_yaml
-from pandas import DataFrame, read_csv, concat, to_datetime
+from pandas import DataFrame, read_pickle, concat, to_datetime
 import datetime
+import pytz
 
 class TodoIstExtractor(ETLJobInterface):
     def __init__(self):
@@ -17,36 +18,27 @@ class TodoIstExtractor(ETLJobInterface):
         api_key = read_yaml(CONFIG_PATH + 'app_config.yaml')['API_KEYS']['TODOIST_API_KEY']
         self.todoist_api = TodoistAPI(token=api_key)
         
-        #get record data update track
-        last_update = self.__get_last_data_update_record_track(DATA_TRACK_PATH + 'extraction_records.txt')
-        self.last_update = last_update if last_update != '' else None
         
-    def __get_last_data_update_record_track(self, file_path: str, time_format: str = "%Y-%m-%d %H:%M:%S") -> TimeRecord:
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-            if len(lines) == 0:
-                return None
-            last_record = lines[-1]
-            timestamp = datetime.datetime.strptime(last_record.strip(), time_format)
-        return timestamp
-    
     def __update_extraction_record_track(self, file_path: str, timestamp: TimeRecord) -> None:
         with open(file_path, 'a') as file:
             file.write('\n' + timestamp.strftime("%Y-%m-%d %H:%M:%S") )
     
     def __get_open_tasks(self) -> TodoistOpenedTasks:
         try:
+            
             open_tasks = self.todoist_api.get_tasks()
             return open_tasks
            
         # Check for authentication error
         except Exception as error:
-            print(error)
-            return None
+            
+            raise "Failed on getting opened tasks: " + error
+            
             
     def __get_completed_tasks(self, project_ids: List[str]) -> TodoistCompletedTasks:
         completed_tasks = []
         try:
+            
             for project_id in project_ids:
                 shell_command = f"""
                 curl https://api.todoist.com/sync/v9/completed/get_all\
@@ -60,34 +52,41 @@ class TodoIstExtractor(ETLJobInterface):
         
         except Exception as error:
             
-            print(error)
-            return None
+            raise "Failed on getting completed tasks: " + error
+            
             
     def __get_projects(self) -> TodoistProjects:
         
         try:
+            
             projects = self.todoist_api.get_projects()
             return projects
+        
         except Exception as error:
-            print(error)
-            return None
+            
+            raise "Failed on getting projects: " + error
+            
         
     def __get_comments(self, task_ids: List[str]) -> TodoistComments:
 
         try:
+            
             comments = [ comment
                         for task_id in task_ids
                         for comment in self.todoist_api.get_comments(task_id=task_id) 
                         if self.todoist_api.get_comments(task_id=task_id) 
                     ]
             return comments
+        
         except Exception as error:
-            print(error)
-            return None
+            
+            raise "Failed on getting comments: " + error
+            
         
     def __get_productivity_stats(self) -> TodoistKarmaProductivity:
             
             try:
+                
                 shell_command = f"""
                     curl https://api.todoist.com/sync/v9/completed/get_stats \
                     -H "Authorization: Bearer {self.todoist_api._token}"
@@ -95,9 +94,11 @@ class TodoIstExtractor(ETLJobInterface):
                 response = subprocess.run(shell_command, shell=True, capture_output=True)
                 karma_stats = json.loads(response.stdout)['days_items']
                 return karma_stats
+            
             except Exception as error:
-                print(error)
-                return None
+                
+                raise "Failed on getting productivity stats: " + error
+            
     def __parse_to_df(self, data: Dict) -> Table:
         
         
@@ -114,15 +115,64 @@ class TodoIstExtractor(ETLJobInterface):
         return df 
     
     def __track_extraction_datetime(self, data: Json) -> Json:
-        track_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        track_time = datetime.datetime.now(tz=pytz.timezone('America/Sao_Paulo')).strftime("%Y-%m-%d %H:%M:%S")
         data['extraction_datetime'] = to_datetime(track_time)
         
         return data
     
-    
+    def __update_data(self, old_data: DataFrame,new_data: DataFrame, file_name: str) -> DataFrame:
         
+        tmp_old_data = old_data.copy()
+        tmp_new_data = new_data.copy()
+        
+        if file_name == 'opened_tasks.pkl':
+            
+            tmp_old_data['created_at'] = to_datetime(tmp_old_data['created_at'])
+            tmp_new_data['created_at'] = to_datetime(tmp_new_data['created_at'])
+            last_update = tmp_old_data['created_at'].max()
+            filtered_data = tmp_new_data[ tmp_new_data['created_at'] > last_update]
+            
+        elif file_name == 'completed_tasks.pkl':
+            
+            tmp_old_data['completed_at'] = to_datetime(tmp_old_data['completed_at'])
+            tmp_new_data['completed_at'] = to_datetime(tmp_new_data['completed_at'])
+            last_update = tmp_old_data['completed_at'].max()
+            filtered_data = tmp_new_data[ tmp_new_data['completed_at'] > last_update]
+            
+        elif file_name == 'projects.pkl':
+            
+            existent_ids = tmp_old_data['id'].tolist()
+            filtered_data = tmp_new_data[~tmp_new_data['id'].isin(existent_ids)]
+            
+        elif file_name == 'comments.pkl':
+            
+            tmp_old_data['posted_at'] = to_datetime(tmp_old_data['posted_at'])
+            tmp_new_data['posted_at'] = to_datetime(tmp_new_data['posted_at'])
+            last_update = tmp_old_data['posted_at'].max()
+            filtered_data = tmp_new_data[ tmp_new_data['posted_at'] > last_update]
+            
+        elif file_name == 'productivity_stats.pkl':
+            
+            tmp_old_data['date'] = to_datetime(tmp_old_data['date'])
+            tmp_new_data['date'] = to_datetime(tmp_new_data['date'])
+            last_update = tmp_old_data['date'].max()
+            filtered_data = tmp_new_data[ tmp_new_data['date'] > last_update]
+            
+        filtered_data = self.__track_extraction_datetime(filtered_data)
+        updated_data= concat([tmp_old_data, filtered_data], axis=0)
+        return updated_data
     
+    def get_last_data_update_record_track(self, file_path: str, time_format: str = "%Y-%m-%d %H:%M:%S") -> TimeRecord:
     
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            if len(lines) == 0:
+                return None
+            last_record = lines[-1]
+            timestamp = datetime.datetime.strptime(last_record.strip(), time_format)
+        return timestamp
+        
     def extract_data(self) -> Json:
         
         print("Extracting open tasks data...")
@@ -150,11 +200,13 @@ class TodoIstExtractor(ETLJobInterface):
         prod_stats= self.__get_productivity_stats()
         prod_stats_df = self.__parse_to_df(prod_stats)
         print('productivity stats data extracted !!')
-        task_ids = completed_tasks_df['task_id'].tolist()
-        task_ids.extend(open_tasks_df['id'].tolist())
         
         
         # to get comments its is needed task ids
+        task_ids = completed_tasks_df['task_id'].tolist()
+        task_ids.extend(open_tasks_df['id'].tolist())
+        
+    
         print('Extracting comments data...')
         commets= self.__get_comments(task_ids)
         comments_df = self.__parse_to_df(commets) 
@@ -176,44 +228,12 @@ class TodoIstExtractor(ETLJobInterface):
         
         return extracted_data
            
-    #This method is not implemented yet, it actually mocked!!!!!
+    #This method is not fully implemented yet, it actually mocked!!!!!
     # Future work: implement this method to load data on postgresql database
-    def __update_data(self, old_data: DataFrame,new_data: DataFrame, file_name: str) -> DataFrame:
-        
-
-        tmp_old_data = old_data.copy()
-        tmp_new_data = new_data.copy()
-        if file_name == 'opened_tasks.csv':
-            tmp_old_data['created_at'] = to_datetime(tmp_old_data['created_at'])
-            tmp_new_data['created_at'] = to_datetime(tmp_new_data['created_at'])
-            last_update = tmp_old_data['created_at'].max()
-            filtered_data = tmp_new_data[ tmp_new_data['created_at'] > last_update]
-        elif file_name == 'completed_tasks.csv':
-            tmp_old_data['completed_at'] = to_datetime(tmp_old_data['completed_at'])
-            tmp_new_data['completed_at'] = to_datetime(tmp_new_data['completed_at'])
-            last_update = tmp_old_data['completed_at'].max()
-            filtered_data = tmp_new_data[ tmp_new_data['completed_at'] > last_update]
-        elif file_name == 'projects.csv':
-            existent_ids = tmp_old_data['id'].tolist()
-            filtered_data = tmp_new_data[~tmp_new_data['id'].isin(existent_ids)]
-        elif file_name == 'comments.csv':
-            tmp_old_data['posted_at'] = to_datetime(tmp_old_data['posted_at'])
-            tmp_new_data['posted_at'] = to_datetime(tmp_new_data['posted_at'])
-            last_update = tmp_old_data['posted_at'].max()
-            filtered_data = tmp_new_data[ tmp_new_data['posted_at'] > last_update]
-        elif file_name == 'productivity_stats.csv':
-            tmp_old_data['date'] = to_datetime(tmp_old_data['date'])
-            tmp_new_data['date'] = to_datetime(tmp_new_data['date'])
-            last_update = tmp_old_data['date'].max()
-            filtered_data = tmp_new_data[ tmp_new_data['date'] > last_update]
-            
-        filtered_data = self.__track_extraction_datetime(filtered_data)
-        updated_data= concat([tmp_old_data, filtered_data], axis=0)
-        return updated_data
     def load_on_database(self, data: DataFrame, file_name: str) -> None:
         
         if os.path.exists(DATABASE_PATH + file_name):
-            old_data = read_csv(DATABASE_PATH + file_name)
+            old_data = read_pickle(DATABASE_PATH + file_name)
             updated_data = self.__update_data(old_data, data, file_name)
             updated_data.to_pickle(DATABASE_PATH + file_name)
             
