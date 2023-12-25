@@ -128,15 +128,15 @@ class TodoIstExtractor(ETLJobInterface):
         
         if file_name == 'opened_tasks.pkl':
             
-            tmp_old_data['created_at'] = to_datetime(tmp_old_data['created_at'])
-            tmp_new_data['created_at'] = to_datetime(tmp_new_data['created_at'])
+            # tmp_old_data['created_at'] = to_datetime(tmp_old_data['created_at']).dt
+            # tmp_new_data['created_at'] = to_datetime(tmp_new_data['created_at'])
             last_update = tmp_old_data['created_at'].max()
             filtered_data = tmp_new_data[ tmp_new_data['created_at'] > last_update]
             
         elif file_name == 'completed_tasks.pkl':
             
-            tmp_old_data['completed_at'] = to_datetime(tmp_old_data['completed_at'])
-            tmp_new_data['completed_at'] = to_datetime(tmp_new_data['completed_at'])
+            # tmp_old_data['completed_at'] = to_datetime(tmp_old_data['completed_at'])
+            # tmp_new_data['completed_at'] = to_datetime(tmp_new_data['completed_at'])
             last_update = tmp_old_data['completed_at'].max()
             filtered_data = tmp_new_data[ tmp_new_data['completed_at'] > last_update]
             
@@ -147,15 +147,15 @@ class TodoIstExtractor(ETLJobInterface):
             
         elif file_name == 'comments.pkl':
             
-            tmp_old_data['posted_at'] = to_datetime(tmp_old_data['posted_at'])
-            tmp_new_data['posted_at'] = to_datetime(tmp_new_data['posted_at'])
+            # tmp_old_data['posted_at'] = to_datetime(tmp_old_data['posted_at'])
+            # tmp_new_data['posted_at'] = to_datetime(tmp_new_data['posted_at'])
             last_update = tmp_old_data['posted_at'].max()
             filtered_data = tmp_new_data[ tmp_new_data['posted_at'] > last_update]
             
         elif file_name == 'productivity_stats.pkl':
             
-            tmp_old_data['date'] = to_datetime(tmp_old_data['date'])
-            tmp_new_data['date'] = to_datetime(tmp_new_data['date'])
+            # tmp_old_data['date'] = to_datetime(tmp_old_data['date'])
+            # tmp_new_data['date'] = to_datetime(tmp_new_data['date'])
             last_update = tmp_old_data['date'].max()
             filtered_data = tmp_new_data[ tmp_new_data['date'] > last_update]
             
