@@ -16,3 +16,7 @@ type TodoistProjects = List[TodoistProject]
 type TodoistComment = Comment
 type TodoistComments = List[TodoistComment]
 type TodoistKarmaProductivity = Dict
+
+
+
+type Documents = List[dict]

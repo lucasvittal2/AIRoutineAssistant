@@ -5,9 +5,15 @@ AIRoutineAssistant.egg-info/SOURCES.txt
 AIRoutineAssistant.egg-info/dependency_links.txt
 AIRoutineAssistant.egg-info/requires.txt
 AIRoutineAssistant.egg-info/top_level.txt
+DatabaseHandler/MongoDBHandler.py
+DatabaseHandler/PostgresHandler.py
+DatabaseHandler/__init__.py
 Env/__init__.py
+Env/paths copy.py
 Env/paths.py
 Env/project_types.py
+GettingDataETL/transformations.py
+Interfaces/DatabaseHalnder.py
 Interfaces/ETLJobInterface.py
 Interfaces/__init__.py
 Utils/__init__.py

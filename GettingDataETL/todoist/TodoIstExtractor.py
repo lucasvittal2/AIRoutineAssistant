@@ -11,11 +11,13 @@ from pandas import DataFrame, read_pickle, concat, to_datetime
 import datetime
 import pytz
 
+
 class TodoIstExtractor(ETLJobInterface):
     def __init__(self):
         
         #get api key
-        api_key = read_yaml(CONFIG_PATH + 'app_config.yaml')['API_KEYS']['TODOIST_API_KEY']
+        configs = read_yaml(CONFIG_PATH + 'app_config.yaml')
+        api_key = configs['API_KEYS']['TODOIST_API_KEY']
         self.todoist_api = TodoistAPI(token=api_key)
         
         
@@ -128,15 +130,11 @@ class TodoIstExtractor(ETLJobInterface):
         
         if file_name == 'opened_tasks.pkl':
             
-            # tmp_old_data['created_at'] = to_datetime(tmp_old_data['created_at']).dt
-            # tmp_new_data['created_at'] = to_datetime(tmp_new_data['created_at'])
             last_update = tmp_old_data['created_at'].max()
             filtered_data = tmp_new_data[ tmp_new_data['created_at'] > last_update]
             
         elif file_name == 'completed_tasks.pkl':
             
-            # tmp_old_data['completed_at'] = to_datetime(tmp_old_data['completed_at'])
-            # tmp_new_data['completed_at'] = to_datetime(tmp_new_data['completed_at'])
             last_update = tmp_old_data['completed_at'].max()
             filtered_data = tmp_new_data[ tmp_new_data['completed_at'] > last_update]
             
@@ -147,15 +145,11 @@ class TodoIstExtractor(ETLJobInterface):
             
         elif file_name == 'comments.pkl':
             
-            # tmp_old_data['posted_at'] = to_datetime(tmp_old_data['posted_at'])
-            # tmp_new_data['posted_at'] = to_datetime(tmp_new_data['posted_at'])
             last_update = tmp_old_data['posted_at'].max()
             filtered_data = tmp_new_data[ tmp_new_data['posted_at'] > last_update]
             
         elif file_name == 'productivity_stats.pkl':
             
-            # tmp_old_data['date'] = to_datetime(tmp_old_data['date'])
-            # tmp_new_data['date'] = to_datetime(tmp_new_data['date'])
             last_update = tmp_old_data['date'].max()
             filtered_data = tmp_new_data[ tmp_new_data['date'] > last_update]
             
