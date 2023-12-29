@@ -222,18 +222,16 @@ class TodoIstExtractor(ETLJobInterface):
         
         return extracted_data
            
-    #This method is not fully implemented yet, it actually mocked!!!!!
-    # Future work: implement this method to load data on postgresql database
-    def load_on_database(self, data: DataFrame, file_name: str) -> None:
+    def track_data_and_save_locally(self, data: DataFrame, file_name: str) -> None:
         
-        if os.path.exists(DATABASE_PATH + file_name):
-            old_data = read_pickle(DATABASE_PATH + file_name)
+        if os.path.exists(EXTRACTED_DATA_PATH + 'Todoist/' + file_name):
+            old_data = read_pickle(EXTRACTED_DATA_PATH + 'Todoist/' + file_name)
             updated_data = self.__update_data(old_data, data, file_name)
-            updated_data.to_pickle(DATABASE_PATH + file_name)
+            updated_data.to_pickle(EXTRACTED_DATA_PATH + 'Todoist/' + file_name)
             
         else:
             updated_data = self.__track_extraction_datetime(data)
-            data.to_pickle(DATABASE_PATH + file_name)
+            data.to_pickle(EXTRACTED_DATA_PATH + 'Todoist/' + file_name)
         
         
         print(f'Saved data on {file_name}!')

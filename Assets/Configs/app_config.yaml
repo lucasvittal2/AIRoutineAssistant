@@ -5,3 +5,8 @@ API_KEYS:
   OUTLOOK_API_KEY: "your outlook api key"
 
 log: True
+
+databases:
+  local_mongodb:
+    host: "localhost"
+    port: 27017
