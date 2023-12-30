@@ -32,12 +32,14 @@ except:
     raise Exception('Mongodb connection failed !!')
 
 print("writing todoist data on database...")
-
+print(comments_df)
 mongodb.write_data('comments', comments_df.to_dict('records'))
 print("Comments data written !!")
 mongodb.write_data('projects', projects_df.to_dict('records'))
+print(projects_df)
 print("Projects data written !!")
 mongodb.write_data('opened_tasks', opened_tasks_df.to_dict('records'))
+print(opened_tasks_df)
 print("OpenedTasks data written !!")
 mongodb.write_data('completed_tasks', completed_tasks_df.to_dict('records'))
 print("CompletedTasks data written !!")

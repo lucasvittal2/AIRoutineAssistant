@@ -1,16 +1,3 @@
-DO $$ 
-BEGIN
-    IF NOT EXISTS (
-        SELECT FROM pg_database WHERE datname = 'todo_ist_db'
-    ) THEN
-        CREATE DATABASE todo_ist_db;
-    END IF;
-END
-$$;
-
-\c 'todo_ist_db';
-
-
 -- Drop if exist table for reason of update schemas
 
 DROP TABLE IF EXISTS Comments;
@@ -18,8 +5,8 @@ DROP TABLE IF EXISTS Attachments;
 DROP TABLE IF EXISTS CompletedTasks;
 DROP TABLE IF EXISTS OpenedTasks;
 DROP TABLE IF EXISTS Tasks;
-DROP TABLE IF EXISTS ProductivityStats;
 DROP TABLE IF EXISTS Items;
+DROP TABLE IF EXISTS productivitystats;
 DROP TABLE IF EXISTS Projects;
 
 CREATE TABLE Projects(
@@ -38,18 +25,24 @@ CREATE TABLE Projects(
     extraction_datetime TIMESTAMP NOT NULL
 );
 
-CREATE TABLE Items(
-    date TIMESTAMP PRIMARY KEY NOT NULL,
-    project_id CHAR(10) NOT NULL,
-    FOREIGN KEY (project_id) REFERENCES Projects(id)
-);
+
 
 CREATE TABLE ProductivityStats(
+    id CHAR(24) PRIMARY KEY NOT NULL,
     date TIMESTAMP,
     total_completed INT,
-    extraction_datetime TIMESTAMP NOT NULL,
-    FOREIGN KEY (date) REFERENCES Items(date)
+    extraction_datetime TIMESTAMP NOT NULL
+    
 );
+
+CREATE TABLE Items(
+    date TIMESTAMP,
+    prod_stats_id CHAR(24) NOT NULL,
+    project_id CHAR(10) NOT NULL,
+    FOREIGN KEY (project_id) REFERENCES Projects(id),
+    FOREIGN KEY (prod_stats_id) REFERENCES ProductivityStats(id)
+);
+
 
 CREATE TABLE Tasks (
     id CHAR(10) PRIMARY KEY NOT NULL,
@@ -83,25 +76,25 @@ CREATE TABLE OpenedTasks(
     FOREIGN KEY (id) REFERENCES Tasks(id)
 );
 CREATE TABLE Attachments(
-    id CHAR(10) PRIMARY KEY NOT NULL,
+    id CHAR(24) PRIMARY KEY NOT NULL,
     title VARCHAR(255),
     resource_type VARCHAR(50),
     file_size INT,
     file_type VARCHAR(50),
     file_url VARCHAR(255),
     file_duration FLOAT,
+    file_name VARCHAR(100),
     upload_state VARCHAR(50),
     image VARCHAR(255),
     image_width INT,
     image_height INT,
-    url VARCHAR(255),
-    extraction_datetime TIMESTAMP NOT NULL
+    url VARCHAR(255)
 );
 
 CREATE TABLE comments (
      id CHAR(10)  PRIMARY KEY NOT NULL,
-    attachment_id CHAR(10) NOT NULL,
-    content VARCHAR(500),
+    attachment_id CHAR(24) NOT NULL,
+    content VARCHAR(4000),
     posted_at TIMESTAMP NOT NULL,
     task_id CHAR(10) NOT NULL,
     extraction_datetime TIMESTAMP NOT NULL,

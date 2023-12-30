@@ -1,56 +1,56 @@
-from pyspark.sql import SparkSession, DataFrame as SparkDataFrame
 from pandas import DataFrame as PandasDataFrame
-import findspark
+from sqlalchemy import create_engine
 from Interfaces.DatabaseHandler import DatabaseHandler
 from Env.paths import DRIVERS_PATH,CONFIG_PATH
 from Utils.file_handler import read_yaml
 from Env.project_types import *
+import psycopg2
 
 class PostgresHandler(DatabaseHandler):
     def __init__(self):
-        findspark.init()
-        self.sparkSession = SparkSession.builder \
-                            .appName("Postgres Datawarehouse Connection with PySpark") \
-                            .config("spark.jars", DRIVERS_PATH + "postgresql-42.7.1.jar") \
-                            .getOrCreate()
-        
+       
         self.postgres_configs  = read_yaml(CONFIG_PATH + 'app_config.yaml')['databases']['postgres']
-        
         #set disconnect statte
         self.url = None
         self.properties= None
 
     def connect(self, db_name: str) -> None:
-        
         host = self.postgres_configs['host']
-        port =self.postgres_configs['port']
+        port = self.postgres_configs['port']
         user = self.postgres_configs['user']
         password = self.postgres_configs['password']
-        driver = self.postgres_configs['driver']
-        
-        self.properties = {
-            "user": user,
-            "password": password,
-            "driver": driver
-        }
-        self.url = f"jdbc:postgresql://{host}:{port}/{db_name}"
+
+        # Create connection string
+        self.conn_str = f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
+
+        # Create connection
+        self.conn = psycopg2.connect(self.conn_str)
 
     def disconnect(self):
         #set disconnect statte
-        self.url = None
-        self.properties= None
+        self.conn = None
         
-    def __filter_duplicates(self, table_name: str, data: SparkDataFrame) -> SparkDataFrame:
-        df = self.sparkSession.jdbc(self.url, table_name, properties=self.properties)
-        last_update = df.agg({"extraction_date": "max"}).collect()[0][0]
-        filtered_df = data.filter(f"extraction_date > '{last_update}'")
+    def __filter_duplicates(self, table_name: str, data: PandasDataFrame) -> PandasDataFrame:
+        df = self.read_data(table_name)
+        
+        if len(df) == 0:
+            return data #do full load
+        
+        last_update = df['extraction_datetime'].max()
+        filtered_df = data[data['extraction_datetime'] > last_update]
         return filtered_df
 
     def write_data(self, table_name: str, data: PandasDataFrame) -> None:
-        spark_df = SparkDataFrame(data)
-        filtered_df = self.__filter_duplicates(table_name, spark_df)
-        filtered_df.write.jdbc(self.url, table_name, properties=self.properties, mode='overwrite')
+        postgresdb = create_engine(self.conn_str)
+        filtered_df = self.__filter_duplicates(table_name, data)
+        filtered_df.to_sql(table_name, postgresdb.engine, if_exists='append', index=False)
 
     def read_data(self, table_name: str) -> PandasDataFrame:
-        df = self.sparkSession.jdbc(self.url, table_name, properties=self.properties)
-        return df.toPandas()
+        cursor = self.conn.cursor()
+        query = f"SELECT * FROM {table_name}"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        data = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
+        
+        return PandasDataFrame(data)
+

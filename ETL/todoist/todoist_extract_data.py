@@ -50,4 +50,4 @@ print(f"""
 
 print('Data tracking finished !!')
 print('-'*150)
-print('Job \'todoist_pipeline\' finished !!')
+print('Job \'todoist_extract_data\' finished !!')
