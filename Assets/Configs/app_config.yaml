@@ -1,5 +1,6 @@
 #app configs
 API_KEYS:
+
   TODOIST_API_KEY: "003996cd9a3c509419a9642cefdfe195a6e8d86e"
   GOOGLE_API_KEY: "your google api key"
   OUTLOOK_API_KEY: "your outlook api key"
@@ -7,6 +8,17 @@ API_KEYS:
 log: True
 
 databases:
+  
   local_mongodb:
+
     host: "localhost"
     port: 27017
+
+  postgres:
+
+    #url: "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+    user:  "postgres"
+    password: "1234567890"
+    host: '127.0.0.1'
+    port: 5432
+    driver: "org.postgresql.Driver"
