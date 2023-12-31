@@ -7,6 +7,19 @@ API_KEYS:
 
 log: True
 
+airflow:
+  todoist_job:
+    schedule_interval: "30 */1 * * *"
+    dag_id: "todoist_etl_job"
+    dag_file: "todoist_etl_job.py"
+    dag_name: "todoist_etl_job"
+    dag_description: "This job extracts data from todoist, load data on mongodb staging, do all needed transformation and load on Postgres DW. "
+    dag_start_date: "2023-12-31"
+    dag_owner: lucasvittal
+    dag_email: lucasvittal2@outlook.com
+    dag_retries: 1
+    dag_retry_delay: 2
+
 databases:
   
   local_mongodb:
