@@ -5,18 +5,18 @@ from todoist_api_python.models import Task, CompletedItems,Project, Comment
 from todoist_api_python.models import Project
 from typing import List
 
-type Table = DataFrame
-type Json = Dict
-type TimeRecord = datetime
-type TodoistOpenedTask = Task
-type TodoistOpenedTasks = List[TodoistOpenedTask]
-type TodoistCompletedTasks = CompletedItems
-type TodoistProject = List[Project]
-type TodoistProjects = List[TodoistProject]
-type TodoistComment = Comment
-type TodoistComments = List[TodoistComment]
-type TodoistKarmaProductivity = Dict
+Table = DataFrame
+Json = Dict
+TimeRecord = datetime
+TodoistOpenedTask = Task
+TodoistOpenedTasks = List[TodoistOpenedTask]
+TodoistCompletedTasks = CompletedItems
+TodoistProject = List[Project]
+TodoistProjects = List[TodoistProject]
+TodoistComment = Comment
+TodoistComments = List[TodoistComment]
+TodoistKarmaProductivity = Dict
 
 
 
-type Documents = List[dict]
+Documents = List[dict]
