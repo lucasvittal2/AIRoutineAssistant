@@ -40,7 +40,8 @@ CREATE TABLE Items(
     prod_stats_id CHAR(24) NOT NULL,
     project_id CHAR(10) NOT NULL,
     FOREIGN KEY (project_id) REFERENCES Projects(id),
-    FOREIGN KEY (prod_stats_id) REFERENCES ProductivityStats(id)
+    FOREIGN KEY (prod_stats_id) REFERENCES ProductivityStats(id),
+    extraction_datetime TIMESTAMP NOT NULL
 );
 
 
@@ -56,13 +57,14 @@ CREATE TABLE Tasks (
 CREATE TABLE CompletedTasks(
     id CHAR(10) PRIMARY KEY NOT NULL,
     user_id CHAR(8) NOT NULL,
+    completed_at TIMESTAMP,
+    extraction_datetime TIMESTAMP NOT NULL,
     FOREIGN KEY (id) REFERENCES Tasks(id)
 );
 
 CREATE TABLE OpenedTasks(
     id CHAR(10) PRIMARY KEY NOT NULL,
-    assignee_id CHAR(8) NOT NULL,
-    assigner_id CHAR(8) NOT NULL,
+    assignee_id CHAR(8),
     comment_count INT,
     created_at TIMESTAMP,    
     creator_id CHAR(8) NOT NULL,
@@ -73,6 +75,7 @@ CREATE TABLE OpenedTasks(
     parent_id CHAR(10),
     priority INT,
     url VARCHAR(255),
+    extraction_datetime TIMESTAMP NOT NULL,
     FOREIGN KEY (id) REFERENCES Tasks(id)
 );
 CREATE TABLE Attachments(
@@ -88,7 +91,8 @@ CREATE TABLE Attachments(
     image VARCHAR(255),
     image_width INT,
     image_height INT,
-    url VARCHAR(255)
+    url VARCHAR(255),
+    extraction_datetime TIMESTAMP NOT NULL
 );
 
 CREATE TABLE comments (
