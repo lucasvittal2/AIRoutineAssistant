@@ -2,9 +2,9 @@ from DatabaseHandler.PostgresHandler import PostgresHandler
 
 
 class TodoistMetricCalculator:
-    def __init__(self, db_name:str):
+    def __init__(self):
         self.postgres_handler = PostgresHandler()
-        self.postgres_handler.connect(db_name)
+        self.postgres_handler.connect('todoist')
         
 
     def get_opened_tasks_amount(self):
@@ -21,15 +21,15 @@ class TodoistMetricCalculator:
         response = self.postgres_handler.read_data(query)
         return response['content'].tolist()
     
-    def get_subtasks_amount(self, tasks_content:str = None):
-        if tasks_content:
+    def get_subtasks_amount(self, task:str = None):
+        if task:
             query = f"""
                 SELECT COUNT(ot.id)
                 FROM openedtasks ot 
                 INNER JOIN  tasks t 
                 ON ot.parent_id = t.id 
                 WHERE ot.parent_id IS NOT NULL
-                AND t.content={tasks_content};
+                AND t.content='{task}';
             """
         else:
             query = """
@@ -44,7 +44,7 @@ class TodoistMetricCalculator:
         if date:
             query = f"""
                 SELECT COUNT(*) FROM completedtasks
-                WHERE DATE(completed_at)=DATE({date});
+                WHERE DATE(completed_at)=DATE('{date}');
             """
         else:
             query = """
@@ -70,7 +70,7 @@ class TodoistMetricCalculator:
                     FROM completedtasks ct 
                     INNER JOIN tasks t
                     ON t.id=ct.id
-                    WHERE DATE(completed_at)=DATE({date}) ;
+                    WHERE DATE(completed_at)=DATE('{date}') ;
 
                 """
         else:
@@ -87,7 +87,7 @@ class TodoistMetricCalculator:
                 ON t.id=ct.id
                 INNER JOIN projects p
                 ON t.project_id=p.id
-                WHERE DATE(completed_at)=DATE({date})
+                WHERE DATE(completed_at)=DATE('{date}')
                 GROUP BY p.name
                 ORDER BY count DESC;
             """
@@ -99,12 +99,11 @@ class TodoistMetricCalculator:
                 ON t.id=ct.id
                 INNER JOIN projects p
                 ON t.project_id=p.id
-                WHERE DATE(completed_at)=DATE({date})
                 GROUP BY p.name
                 ORDER BY count DESC;
             """
         response = self.postgres_handler.read_data(query)
-        return response['count'][0]
+        return response.to_dict('records')
     
     def get_comments(self, task: str, date:str = None):
         
@@ -113,15 +112,15 @@ class TodoistMetricCalculator:
             SELECT c.posted_at, c.content 
             FROM comments c INNER JOIN  tasks t 
             on t.id=c.task_id 
-            WHERE t.content={task}
-            AND DATE(c.posted_at)=DATE({date});
+            WHERE t.content='{task}'
+            AND DATE(c.posted_at)=DATE('{date}');
             """
         else:
             query = f"""
             SELECT c.posted_at, c.content 
             FROM comments c INNER JOIN  tasks t 
             on t.id=c.task_id 
-            WHERE t.content={task};
+            WHERE t.content='{task}';
             """
         response = self.postgres_handler.read_data(query)
         return response['content'].tolist()
@@ -130,7 +129,7 @@ class TodoistMetricCalculator:
         query= f"""
             SELECT content 
             FROM comments 
-            WHERE LOWER(content) LIKE LOWER('%habit%');
+            WHERE LOWER(content) LIKE LOWER('%{key_word}%');
         """
         response = self.postgres_handler.read_data(query)
         return response['content'].tolist()
