@@ -31,7 +31,7 @@ class PostgresHandler(DatabaseHandler):
         self.conn = None
         
     def __filter_duplicates(self, table_name: str, data: PandasDataFrame) -> PandasDataFrame:
-        df = self.read_data(table_name)
+        df = self.read_data(f"SELECT * FROM {table_name}")
         
         if len(df) == 0:
             return data #do full load
