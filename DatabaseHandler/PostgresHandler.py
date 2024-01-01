@@ -45,9 +45,8 @@ class PostgresHandler(DatabaseHandler):
         filtered_df = self.__filter_duplicates(table_name, data)
         filtered_df.to_sql(table_name, postgresdb.engine, if_exists='append', index=False)
 
-    def read_data(self, table_name: str) -> PandasDataFrame:
+    def read_data(self, query: str) -> PandasDataFrame:
         cursor = self.conn.cursor()
-        query = f"SELECT * FROM {table_name}"
         cursor.execute(query)
         rows = cursor.fetchall()
         data = [dict(zip([column[0] for column in cursor.description], row)) for row in rows]
