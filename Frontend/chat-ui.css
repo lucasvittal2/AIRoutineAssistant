@@ -1,0 +1,139 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #b2c0ec;
+    font-family: Arial, sans-serif;
+}
+#chat-ui {
+    background-color: white;
+    width: 700px;
+    height: 800px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #000;
+}
+#messages {
+    height: 80%;
+    width: 95%;
+    padding: 25px 5px;
+    margin: 10px 10px;
+    border: 1px solid #000000;
+    justify-content: center;
+    overflow-y: scroll;
+    border-radius: 10px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#input-area {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #000;
+    height: 8%;
+    padding: 10px;
+    
+}
+#input-area input {
+    width: 80%;
+    padding: 20px;
+}
+#input-area button {
+width: 12%; 
+height: 100%; 
+padding: 12px; 
+}
+
+.message-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-height: 100px;
+    height: auto;
+    border: 1px solid #000;
+    margin: 10px 10px;
+    border-radius: 10px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 10px;
+}
+
+.user-name {
+    order: 1;
+}
+
+
+.user-image {
+    width: 10%; /* Adjust as needed */
+    height: 10%; /* Adjust as needed */
+    border-radius: 50%; /* Makes the image circular */
+    order: 2;
+    padding: 10px
+}
+
+.user-message {
+    order: 3;
+    padding: 10px;
+
+   
+}
+
+       body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #b2c0ec;
+            font-family: Arial, sans-serif;
+        }
+        #chat-ui {
+            background-color: white;
+            width: 700px;
+            height: 800px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid #000;
+        }
+        #messages {
+            height: 80%;
+            width: 95%;
+            padding: 25px 5px;
+            margin: 10px 10px;
+            border: 1px solid #000000;
+            justify-content: center;
+            overflow-y: scroll;
+            border-radius: 10px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #input-area {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #000;
+            height: 8%;
+            padding: 10px;
+            
+        }
+        #input-area input {
+            width: 80%;
+            padding: 20px;
+        }
+        #input-area button {
+        width: 12%; 
+        height: 100%; 
+        padding: 12px; 
+    }
