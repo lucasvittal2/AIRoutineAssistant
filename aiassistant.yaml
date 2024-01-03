@@ -1,4 +1,4 @@
-name: test-env
+name: aiassistant-env
 channels:
   - conda-forge
   - defaults

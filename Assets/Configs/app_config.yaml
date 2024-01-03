@@ -1,12 +1,16 @@
 #app configs
+
+log: True
+proj_base_path: /home/lucas-vital/projects/AIRoutineAssistant/
+
 API_KEYS:
 
   TODOIST_API_KEY: "003996cd9a3c509419a9642cefdfe195a6e8d86e"
   GOOGLE_API_KEY: "your google api key"
   OUTLOOK_API_KEY: "your outlook api key"
-  OPENAI_API_KEY: "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"
+  OPENAI_API_KEY: "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"
 
-log: True
+
 
 airflow:
   todoist_job:

@@ -52,9 +52,10 @@ padding: 12px;
 .message-box {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    min-height: 100px;
+    align-items: flex-start; /* Align items at the start of the cross axis */
+    white-space: pre-wrap;
     height: auto;
+    overflow: auto;
     border: 1px solid #000;
     margin: 10px 10px;
     border-radius: 10px;
@@ -77,7 +78,8 @@ padding: 12px;
     height: 10%; /* Adjust as needed */
     border-radius: 50%; /* Makes the image circular */
     order: 2;
-    padding: 10px
+    padding: 10px;
+    object-fit: cover;
 }
 
 .user-message {

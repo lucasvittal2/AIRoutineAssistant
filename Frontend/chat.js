@@ -48,7 +48,8 @@ function createAndAppendMessageBox( imageSrc, messageText, messagesDiv) {
         .then(data => {
 
             var messagesDiv = document.querySelector('#messages');
-            createAndAppendMessageBox(botImage, data['answer'], messagesDiv);
+            str_msg = (data['answer'])
+            createAndAppendMessageBox(botImage, str_msg, messagesDiv);
         
         })
         .catch(error => console.error('Error:', error));
