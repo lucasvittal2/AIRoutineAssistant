@@ -13,11 +13,35 @@ Regarding its mission, this app will have the following features:
 - Generate Vizualization from user routine metrics
 - Using a GenAI able to interact throug many source and give the routine information aspect of user from a simple text query
 
-Actualy we are developing this ambitious app, we are in the middle of MVP1's development:
+Actualy we finished the development of MVP1 Resulting on AIRoutineAssistant v1.0:
 
 
+![MVP1 Schema](https://github.com/lucasvittal2/AIRoutineAssistant/assets/62555057/c59f79cf-c673-4761-b19b-839826f6994e)
 
-![MVP1 Schema](https://github.com/lucasvittal2/AIRoutineAssistant/assets/62555057/4e9fc96e-7c8f-4c0b-bb09-4e9e7ce9ebf2)
+
+A demonstration of AIRoutineAssistant v1.0 can be seen in the video below:
+
+https://drive.google.com/file/d/1r9hOXkVn7orffF-t7MqrrGV-mucOIuPO/view?usp=sharing
+
 
 
 Our pupose is to enhance the app through iteraction and evoluting it along the sprints in order to take the most assertive decision until reach the final version.
+Therefore a new version is being planned to be developed 🏃.
+Yes, AIRoutineAssistant v2.0 is comming soon 😎
+
+
+Here's the instruction to run AIRoutineAssistant v1.0, it's assuming that you have anaconda python 3.10 installed
+
+- Firstly, go to Openai website and create your account
+- After that create you api key at ![Openai webpage Apikey  section](https://platform.openai.com/api-keys)
+- Get your todoist api token following the  instruction ![Todoist getting token instructions](https://todoist.com/pt-BR/help/articles/find-your-api-token-Jpzx9IIlB)
+-  Config the  app_config.yaml file  putting your todoist api keys and todoist api key
+-  create the env using ` conda env create -f aiassistant.yaml `
+-  Install postgres using the script  `Assets\scripts\install_postgres.sh'
+-  Install Apache airflow using the script `Assets\scripts\install_airflow.sh`
+-  run apache airflow thorgh `airflow standalone'
+-   wait the first job run
+-   Access the ui throu the file `frontend\chat-uit.html` and enjoy your ai assistant
+
+The Assistant functions is config through `Assets/Configs/assistant_functions_config/todoist_assistant_functions_config.json` and functions executed are available on `Assistant\GPTAssistant.py`
+If you want add new function modify json file accordly openai instructions at ![Openai Assistant document Overview](https://platform.openai.com/docs/assistants/overview) and add new functions on GPTAssistant.py.
