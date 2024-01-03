@@ -1,7 +1,7 @@
 from DatabaseHandler.PostgresHandler import PostgresHandler
 
 
-class TodoistMetricCalculator:
+class TodoistInformationRetriever:
     def __init__(self):
         self.postgres_handler = PostgresHandler()
         self.postgres_handler.connect('todoist')
@@ -76,7 +76,7 @@ class TodoistMetricCalculator:
         else:
             return None
         response = self.postgres_handler.read_data(query)
-        return response['content'].tolist()
+        return[] if response.empty else response['content'].tolist()
     
     def get_projects_completed_tasks(self, date:str = None):
         if date:
@@ -105,31 +105,51 @@ class TodoistMetricCalculator:
         response = self.postgres_handler.read_data(query)
         return response.to_dict('records')
     
+    
+    
     def get_comments(self, task: str, date:str = None):
         
         if date:
             query = f"""
-            SELECT c.posted_at, c.content 
+            SELECT t.id, c.posted_at, c.content, a.file_url 
             FROM comments c INNER JOIN  tasks t 
-            on t.id=c.task_id 
+            ON t.id=c.task_id
+            INNER JOIN  attachments a
+            ON c.attachment_id=a.id 
             WHERE t.content='{task}'
             AND DATE(c.posted_at)=DATE('{date}');
             """
         else:
             query = f"""
-            SELECT c.posted_at, c.content 
+            SELECT t.id, c.posted_at, c.content, a.file_url  
             FROM comments c INNER JOIN  tasks t 
-            on t.id=c.task_id 
+            ON t.id=c.task_id
+            INNER JOIN  attachments a
+            ON c.attachment_id=a.id 
             WHERE t.content='{task}';
             """
         response = self.postgres_handler.read_data(query)
-        return response['content'].tolist()
+        
+        if response.empty:
+            return []
+
+        contents = [content + '\n\n' if content != "" else content for content in response['content'].tolist()]
+        attachmets = response['file_url'].tolist()
+        return [f'{contents[i]} você anexou o arquivo: {attachmets[i]}' for i in range(len(contents))]
     
     def get_comments_by_word(self, key_word:str):
         query= f"""
-            SELECT content 
-            FROM comments 
-            WHERE LOWER(content) LIKE LOWER('%{key_word}%');
+            SELECT t.id, c.posted_at, c.content, a.file_url 
+            FROM comments c INNER JOIN  tasks t 
+            ON t.id=c.task_id
+            INNER JOIN  attachments a
+            ON c.attachment_id=a.id 
+            WHERE LOWER(c.content) LIKE LOWER('%{key_word}%');
         """
+        
         response = self.postgres_handler.read_data(query)
-        return response['content'].tolist()
+        contents = [content + '\n\n' if content != "" else content for content in response['content'].tolist()]
+        attachmets = response['file_url'].tolist()
+        
+        return [f'{contents[i]} você anexou o arquivo: {attachmets[i]}' for i in range(len(contents))]
+    

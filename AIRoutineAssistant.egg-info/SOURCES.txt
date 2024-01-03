@@ -5,6 +5,9 @@ AIRoutineAssistant.egg-info/SOURCES.txt
 AIRoutineAssistant.egg-info/dependency_links.txt
 AIRoutineAssistant.egg-info/requires.txt
 AIRoutineAssistant.egg-info/top_level.txt
+Assistant/GPTAssistant.py
+Assistant/__init__.py
+Assistant/assistant_api.py
 DatabaseHandler/MongoDBHandler.py
 DatabaseHandler/PostgresHandler.py
 DatabaseHandler/__init__.py
@@ -14,8 +17,11 @@ Env/__init__.py
 Env/paths copy.py
 Env/paths.py
 Env/project_types.py
+InformationRetriever/TodoistInformationRetriever.py
+InformationRetriever/__init__.py
 Interfaces/DatabaseHandler.py
 Interfaces/ETLJobInterface.py
 Interfaces/__init__.py
 Utils/__init__.py
 Utils/file_handler.py
+Utils/strtime_handler.py

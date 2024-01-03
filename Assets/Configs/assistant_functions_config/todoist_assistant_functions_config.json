@@ -1,0 +1,124 @@
+[
+            {
+                "type": "function",
+                "function": {
+                    "name": "obter_quantidade_tarefas_abertas",
+                    "description": "Obtem a quantidade total de tarefas abertas",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
+                        },
+                        "required": []
+                    }
+                
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "obter_quantidade_tarefas_concluidas",
+                    "description": "obtem a quantidade total de tarefas concluídas em uma determinada data",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "data": {
+                                    "type": "string",
+                                    "description": "data no formato 'YYYY-MM-dd', por exemplo '2022-12-12'.Vale observar que este parametro pode ser referenciado como dia, por exemplo dia '2023-12-12'."
+                                }
+                        },
+                        "required": ["data"]
+                    }
+                    
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "obter_media_diaria_tarefas_concluidas",
+                    "description": "obtem  média diária de tarefas concluídas até o presente momento.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {}
+                        },
+                        "required": []
+                    }
+                
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "obter_quais_foram_as_tarefas_concluidas",
+                    "description": "obtem quais foram as tarefas concluídas em uma determinada data",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                                    "data": {
+                                    "type": "string",
+                                    "description": "data no formato 'YYYY-MM-dd', por exemplo '2022-12-12'.  Vale observar que este parametro pode ser referenciado como dia, por exemplo dia '2023-12-12'"
+                                }
+                        }
+                        },
+                        "required": []
+                    }
+                
+            },
+                        {
+                "type": "function",
+                "function": {
+                    "name": "obter_quantidade_tarefas_concluidas_por_projeto",
+                    "description": "Obtem quantas foram as tarefas concluídas por projeto em uma determinada data caso ela seja informada.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                                    "data": {
+                                    "type": "string",
+                                    "description": "data no formato 'YYYY-MM-dd', por exemplo '2022-12-12'. Vale observar que este parametro pode ser referenciado como dia, por exemplo dia '2023-12-12'."
+                                }
+                        }
+                        },
+                        "required": []
+                    }
+                
+            },
+                        
+            {
+                "type": "function",
+                "function": {
+                    "name": "obter_comentarios_tarefa",
+                    "description": "Obtem todos os comentarios de uma determinada tarefa a partir do título da tarefa",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                                    "titulo_tarefa": {
+                                    "type": "string",
+                                    "description": "Esse parametro se refe ao título que especifica a tarefa no todoist"
+                                },
+                                "data": {
+                                "type": "string",
+                                "description": "data no formato 'YYYY-MM-dd', por exemplo '2022-12-12'. Vale observar que este parametro pode ser referenciado como dia, por exemplo dia '2023-12-12'."
+                                }
+                            }
+                        },
+                        "required": ["titulo_tarefa"]
+                    }
+                
+            },
+            
+            {
+                "type": "function",
+                "function": {
+                    "name": "obter_comentarios_por_palavra_chave",
+                    "description": "Obtem todos os comentarios de uma determinada tarefa a partir de uma palavra chave",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                                    "palavra_chave": {
+                                    "type": "string",
+                                    "description": "Esse parametro a palavra chave ao qual deve  estar contida no comentario."
+                                }
+                        },
+                        "required": ["titulo_tarefa"]
+                        }
+                    }
+                
+            }
+    ]

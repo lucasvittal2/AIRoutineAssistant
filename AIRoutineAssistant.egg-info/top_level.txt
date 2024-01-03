@@ -1,5 +1,7 @@
+Assistant
 DatabaseHandler
 ETL
 Env
+InformationRetriever
 Interfaces
 Utils
